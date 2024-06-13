@@ -1,7 +1,7 @@
 """
 """
 function demo()
-    println("""Executing:
+   println("""Executing:
 
    h = $(@__MODULE__).TH1D("h", "Normal distribution", 100, -5, 5)
    FillRandom(h, "gaus")
@@ -13,6 +13,6 @@ function demo()
     FillRandom(h, "gaus")
     c = ROOT.TCanvas()
     Fit(h, "gaus")
-    c
+    Draw(c)
 end
 

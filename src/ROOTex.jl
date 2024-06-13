@@ -3,7 +3,7 @@
 # demo_fit_with_jl_func.jl for an example of such a fit without this module.
 #
 
-export TF1W, TGraphW
+export TF1W, TGraphW, GetObject
 
 import Base.convert
 
@@ -43,6 +43,22 @@ end
 
 function Fit(g::TGraph, tf1::TF1, option::String = "", goption::String = "", rxmin::Number = 0, rxmax::Number = 0)
     Fit(g, CxxPtr(tf1), option, goption, rxmin, rxmax)
+end
+
+#---TFile extensions-------------------------------------------------------------------------------
+function GetObject(file::Union{ROOT.TDirectoryFile, CxxPtr{<:ROOT.TDirectoryFile}}, name::AbstractString)
+    obj = Get(file, name)               # Get object from file (TObject*)     
+    obj == C_NULL && return C_NULL
+    type = getproperty(ROOT, IsA(obj) |> GetName |> Symbol)
+    return CxxWrap.CxxPtr{type}(obj)[]  # Cast to the proper type
+end
+
+function Base.getproperty(file::Union{ROOT.TDirectoryFile, CxxPtr{<:ROOT.TDirectoryFile}}, sym::Symbol)
+    if sym === :cpp_object
+        return getfield(file, :cpp_object)
+    else
+        return GetObject(file, String(sym))
+    end
 end
 
 
