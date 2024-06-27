@@ -126,7 +126,7 @@ function Get(file::Union{TDirectoryFile, CxxPtr{<:TDirectoryFile}}, name, type, 
 end
 
 #See https://root.cern/doc/v632/TDirectory_8cxx.html#a942917eb21a84f137c08b7d4185f1b44
-const ROOT.TDirectory!kMaxLen = 2056
+global const ROOT.TDirectory!kMaxLen = 2056
 
 function ROOT.TDirectory!DecodeNameCycle(name)
     cycle = zeros(Int16)
