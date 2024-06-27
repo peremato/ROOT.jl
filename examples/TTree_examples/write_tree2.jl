@@ -1,29 +1,38 @@
 using ROOT
+const R = ROOT
 
-println("Creating a ROOT file with a TTree filled with arrays.\n")
+println("Creating a ROOT file with a TTree filled with  arrays.\n")
 
-f = ROOT.TFile!Open("test2.root", "RECREATE")
-tree = ROOT.TTree("tree", "tree")
+f = R.TFile!Open("test2.root", "RECREATE")
+tree = R.TTree("tree", "tree")
 
-const maxMuons = 10
+nMuon::Array{Int32,0} = fill(0)
+Muon_pt::Vector{Float32} = Float32[]
+Muon_eta::Vector{Float32} = Float32[]
+Muon_phi::Vector{Float32} = Float32[]
 
-nMuon    = Ref{Int32}(0)
-Muon_pt  = Vector{Float32}(undef, maxMuons)
-Muon_eta = Vector{Float32}(undef, maxMuons)
-Muon_phi = Vector{Float32}(undef, maxMuons)
-
-Branch(tree, "nMuon", nMuon, 32000, 99)
-Branch(tree, "Muon_pt[nMuon]", Muon_pt, 32000, 99)
-Branch(tree, "Muon_eta[nMuon]", Muon_eta, 32000, 99)
-Branch(tree, "Muon_phi[nMuon]", Muon_phi, 32000, 99)
+brCnt = Branch(tree, "nMuon", nMuon, 32000, 99)
+brMuon_pt  = Branch(tree, "Muon_pt[nMuon]", Muon_pt, 32000, 99)
+brMuon_eta = Branch(tree, "Muon_eta[nMuon]", Muon_eta, 32000, 99)
+brMuon_phi = Branch(tree, "Muon_phi[nMuon]", Muon_phi, 32000, 99)
 
 nevts = 10
 
 for i in 1:nevts
     nMuon[] = rand(1:10)
-    Muon_pt[1:nMuon[]] .= 100 .* rand(Float32, nMuon[])
-    Muon_eta[1:nMuon[]] .= 5 .- 10 .* rand(Float32, nMuon[])
-    Muon_phi[1:nMuon[]] .= 2π * rand(Float32, nMuon[])
+
+    #resizing the vectors instead of instantiating new ones
+    #is expected to reduce number of allocation and runs faster
+    resize!.([Muon_pt, Muon_eta, Muon_phi], nMuon[])
+    
+    Muon_pt .= 100 .* rand(Float32, nMuon[])
+    Muon_eta .= 5 .- 10 .* rand(Float32, nMuon[])
+    Muon_phi .= 2π * rand(Float32, nMuon[])
+    
+    #Vectors resizing can invalidate the addresses, need to set them again.
+    SetAddress(brMuon_pt, Muon_pt)
+    SetAddress(brMuon_eta, Muon_eta)
+    SetAddress(brMuon_phi, Muon_phi)
 
     println("Fill tree with an event containing ", nMuon[], " muons.")
     
