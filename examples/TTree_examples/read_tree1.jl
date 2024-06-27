@@ -5,7 +5,7 @@ println("Reading back the file created with write_tree1.jl using TTree::GetEntry
 f = ROOT.TFile!Open("test1.root")
 f != C_NULL || error("File not found.")
 
-t = GetObject(f, "tree")
+t = Get(f, "tree")
 t != C_NULL ||  error("Tree not found!")
 
 a = Ref{Int32}(0)
